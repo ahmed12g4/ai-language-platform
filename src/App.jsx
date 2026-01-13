@@ -4,14 +4,20 @@ const EnglishLearningPlatform = () => {
   // User State
   const [user, setUser] = useState({
     name: "Student",
-    level: 3,
-    levelProgress: 65,
-    points: 1850,
-    streak: 12,
-    totalPracticeHours: 28.5,
-    sessionsCompleted: 42,
-    accuracyRate: 82,
+    level: 1,
+    levelProgress: 0,
+    points: 0,
+    streak: 0,
+    totalPracticeHours: 0,
+    sessionsCompleted: 0,
+    accuracyRate: 0,
     dailyGoal: 3,
+    avatarColor: "#2563eb",
+    dailyGoalProgress: 0,
+    weeklyGoal: 10,
+    weeklyGoalProgress: 0,
+    monthlyGoal: 40,
+    monthlyGoalProgress: 0,
   });
 
   // Practice Session State
@@ -32,22 +38,24 @@ const EnglishLearningPlatform = () => {
   const [isThinking, setIsThinking] = useState(false);
   const [aiVoiceEnabled, setAiVoiceEnabled] = useState(true);
   const [activePage, setActivePage] = useState("dashboard");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
 
   // Learning Progress
   const [learningProgress, setLearningProgress] = useState({
-    vocabulary: 72,
-    grammar: 85,
-    pronunciation: 68,
-    fluency: 75,
-    listening: 80,
-    speaking: 70,
+    vocabulary: 0,
+    grammar: 0,
+    pronunciation: 0,
+    fluency: 0,
+    listening: 0,
+    speaking: 0,
   });
 
   // Resources State
   const [activeResource, setActiveResource] = useState(null);
-  const [completedLessons, setCompletedLessons] = useState([1, 3, 5, 8]);
+  const [completedLessons, setCompletedLessons] = useState([]);
   const [activeResourceTab, setActiveResourceTab] = useState("grammar");
   const [currentLessonContent, setCurrentLessonContent] = useState(null);
   const [lessonProgress, setLessonProgress] = useState({});
@@ -65,14 +73,53 @@ const EnglishLearningPlatform = () => {
   const isMicrophoneManuallyStopped = useRef(false);
   const mainContainerRef = useRef(null);
 
-  // Handle scroll for header
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  // Color Scheme - Professional Blue Theme
+  const colors = {
+    primary: "#2563eb",
+    primaryLight: "#3b82f6",
+    primaryLighter: "#93c5fd",
+    primaryDark: "#1d4ed8",
+    secondary: "#059669",
+    secondaryLight: "#10b981",
+    secondaryLighter: "#a7f3d0",
+    secondaryDark: "#047857",
+    accent: "#d97706",
+    accentLight: "#f59e0b",
+    accentLighter: "#fde68a",
+    accentDark: "#b45309",
+    success: "#10b981",
+    successLight: "#34d399",
+    successLighter: "#a7f3d0",
+    warning: "#f59e0b",
+    warningLight: "#fbbf24",
+    warningLighter: "#fde68a",
+    error: "#ef4444",
+    errorLight: "#f87171",
+    errorLighter: "#fecaca",
+    info: "#3b82f6",
+    infoLight: "#60a5fa",
+    infoLighter: "#bfdbfe",
+    background: "#f8fafc",
+    surface: "#ffffff",
+    surfaceLight: "#f1f5f9",
+    surfaceDark: "#e2e8f0",
+    textPrimary: "#0f172a",
+    textSecondary: "#475569",
+    textTertiary: "#64748b",
+    border: "#e2e8f0",
+    borderLight: "#f1f5f9",
+    borderDark: "#cbd5e1",
+    gray50: "#f8fafc",
+    gray100: "#f1f5f9",
+    gray200: "#e2e8f0",
+    gray300: "#cbd5e1",
+    gray400: "#94a3b8",
+    gray500: "#64748b",
+    gray600: "#475569",
+    gray700: "#334155",
+    gray800: "#1e293b",
+    gray900: "#0f172a",
+  };
 
   // Scenarios Data
   const scenarios = [
@@ -81,7 +128,7 @@ const EnglishLearningPlatform = () => {
       title: "Daily Conversations",
       category: "Beginner",
       description: "Practice basic daily conversations and greetings",
-      duration: "10-15 min",
+      duration: "10-15 minutes",
       sentences: [
         "Hello, how are you today?",
         "What is your name?",
@@ -89,7 +136,7 @@ const EnglishLearningPlatform = () => {
         "What do you do for work?",
         "Nice to meet you!",
       ],
-      color: "#0078D4",
+      color: colors.primary,
       icon: "M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z",
       topics: ["Greetings", "Introductions", "Basic Questions"],
       learningTips: [
@@ -97,13 +144,14 @@ const EnglishLearningPlatform = () => {
         "Practice common greetings and responses",
         "Focus on clear pronunciation of basic words",
       ],
+      iconColor: colors.primaryLight,
     },
     {
       id: 2,
       title: "Restaurant & Food",
       category: "Beginner",
       description: "Order food and drinks at restaurants",
-      duration: "15-20 min",
+      duration: "15-20 minutes",
       sentences: [
         "I would like to order a coffee",
         "Can I see the menu please?",
@@ -111,7 +159,7 @@ const EnglishLearningPlatform = () => {
         "The food is delicious",
         "Can I have the bill please?",
       ],
-      color: "#107C10",
+      color: colors.secondary,
       icon: "M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z",
       topics: ["Ordering", "Menu Items", "Paying"],
       learningTips: [
@@ -119,13 +167,14 @@ const EnglishLearningPlatform = () => {
         "Practice polite requests",
         "Master numbers for prices",
       ],
+      iconColor: colors.secondaryLight,
     },
     {
       id: 3,
       title: "Travel & Directions",
       category: "Intermediate",
       description: "Ask for directions and travel information",
-      duration: "20-25 min",
+      duration: "20-25 minutes",
       sentences: [
         "Where is the nearest bus station?",
         "How do I get to the city center?",
@@ -133,7 +182,7 @@ const EnglishLearningPlatform = () => {
         "Is this seat taken?",
         "Can you help me with my luggage?",
       ],
-      color: "#E3008C",
+      color: colors.accent,
       icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
       topics: ["Directions", "Transportation", "Time"],
       learningTips: [
@@ -141,13 +190,14 @@ const EnglishLearningPlatform = () => {
         "Practice asking for and giving directions",
         "Master time expressions",
       ],
+      iconColor: colors.accentLight,
     },
     {
       id: 4,
       title: "Shopping",
       category: "Intermediate",
       description: "Practice shopping conversations",
-      duration: "15-20 min",
+      duration: "15-20 minutes",
       sentences: [
         "How much does this shirt cost?",
         "Do you have this in a different size?",
@@ -155,7 +205,7 @@ const EnglishLearningPlatform = () => {
         "Is there a discount available?",
         "I will take this one",
       ],
-      color: "#D83B01",
+      color: colors.info,
       icon: "M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z",
       topics: ["Prices", "Sizes", "Bargaining"],
       learningTips: [
@@ -163,13 +213,14 @@ const EnglishLearningPlatform = () => {
         "Practice comparative adjectives",
         "Master money-related expressions",
       ],
+      iconColor: colors.infoLight,
     },
     {
       id: 5,
       title: "Job Interviews",
       category: "Advanced",
       description: "Practice common interview questions",
-      duration: "25-30 min",
+      duration: "25-30 minutes",
       sentences: [
         "Tell me about yourself",
         "What are your strengths?",
@@ -177,7 +228,7 @@ const EnglishLearningPlatform = () => {
         "Where do you see yourself in five years?",
         "What are your salary expectations?",
       ],
-      color: "#0078D4",
+      color: colors.primaryDark,
       icon: "M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
       topics: ["Self-introduction", "Strengths", "Career Goals"],
       learningTips: [
@@ -185,13 +236,14 @@ const EnglishLearningPlatform = () => {
         "Learn professional vocabulary",
         "Master present perfect tense for experience",
       ],
+      iconColor: colors.primaryLighter,
     },
     {
       id: 6,
       title: "Business Meetings",
       category: "Advanced",
       description: "Participate in professional discussions",
-      duration: "30-35 min",
+      duration: "30-35 minutes",
       sentences: [
         "Let me present the quarterly results",
         "What are your thoughts on this proposal?",
@@ -199,7 +251,7 @@ const EnglishLearningPlatform = () => {
         "Can we schedule a follow-up meeting?",
         "Thank you for your contribution",
       ],
-      color: "#107C10",
+      color: colors.secondaryDark,
       icon: "M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4",
       topics: ["Presentations", "Discussions", "Planning"],
       learningTips: [
@@ -207,6 +259,7 @@ const EnglishLearningPlatform = () => {
         "Practice formal expressions",
         "Master passive voice for reports",
       ],
+      iconColor: colors.secondaryLighter,
     },
   ];
 
@@ -218,9 +271,10 @@ const EnglishLearningPlatform = () => {
         title: "Present Simple Tense",
         description: "Learn to talk about daily routines and facts",
         difficulty: "Beginner",
-        duration: "15 min",
+        duration: "15 minutes",
         points: 25,
-        completed: true,
+        completed: false,
+        color: colors.primary,
         content: {
           overview:
             "The present simple tense is used for habits, routines, and general truths.",
@@ -291,9 +345,10 @@ const EnglishLearningPlatform = () => {
         title: "Past Simple Tense",
         description: "Talk about completed past actions",
         difficulty: "Beginner",
-        duration: "20 min",
+        duration: "20 minutes",
         points: 25,
         completed: false,
+        color: colors.primaryLight,
         content: {
           overview:
             "The past simple tense is used for completed actions at specific times in the past.",
@@ -366,9 +421,10 @@ const EnglishLearningPlatform = () => {
         title: "Present Continuous",
         description: "Talk about actions happening now",
         difficulty: "Beginner",
-        duration: "15 min",
+        duration: "15 minutes",
         points: 25,
-        completed: true,
+        completed: false,
+        color: colors.primary,
         content: {
           overview:
             "The present continuous tense is used for actions happening now or temporary situations.",
@@ -432,228 +488,17 @@ const EnglishLearningPlatform = () => {
           ],
         },
       },
-      {
-        id: 4,
-        title: "Future Tense with Will",
-        description: "Talk about future plans and predictions",
-        difficulty: "Intermediate",
-        duration: "20 min",
-        points: 30,
-        completed: false,
-        content: {
-          overview:
-            "'Will' is used for future predictions, promises, and spontaneous decisions.",
-          sections: [
-            {
-              title: "Usage",
-              points: [
-                "Predictions: It will rain tomorrow.",
-                "Promises: I will help you with your homework.",
-                "Spontaneous decisions: I'll have a cup of coffee.",
-                "Offers: I'll carry that for you.",
-                "Requests: Will you pass the salt?",
-              ],
-            },
-            {
-              title: "Formation",
-              points: [
-                "Positive: will + base verb",
-                "Negative: will + not + base verb (won't)",
-                "Questions: will + subject + base verb",
-              ],
-            },
-            {
-              title: "Contractions",
-              points: [
-                "I will → I'll",
-                "You will → You'll",
-                "He/She/It will → He'll/She'll/It'll",
-                "We will → We'll",
-                "They will → They'll",
-              ],
-            },
-            {
-              title: "Time Expressions",
-              points: [
-                "Tomorrow, next week/month/year",
-                "In an hour, in two days",
-                "Soon, later",
-                "In the future",
-              ],
-            },
-          ],
-          exercises: [
-            {
-              question: "Complete: I think she _____ (pass) the exam.",
-              answer: "will pass",
-              explanation: "'Will' for predictions",
-            },
-            {
-              question: "Make negative: They will arrive late.",
-              answer: "They won't arrive late.",
-              explanation: "Will not → won't",
-            },
-            {
-              question: "Form a question: you / come / to the party",
-              answer: "Will you come to the party?",
-              explanation: "Use 'Will' for future questions",
-            },
-          ],
-          practice: [
-            "Make predictions about the future",
-            "Make promises to yourself",
-            "Plan spontaneous activities",
-          ],
-        },
-      },
-      {
-        id: 5,
-        title: "Present Perfect Tense",
-        description: "Connect past actions to present",
-        difficulty: "Intermediate",
-        duration: "25 min",
-        points: 35,
-        completed: false,
-        content: {
-          overview:
-            "The present perfect connects past actions or experiences to the present moment.",
-          sections: [
-            {
-              title: "Usage",
-              points: [
-                "Experiences: I have visited Japan three times.",
-                "Recent past actions: She has just finished her work.",
-                "Unfinished time periods: I have worked here since 2020.",
-                "Accomplishments: Scientists have discovered a new planet.",
-              ],
-            },
-            {
-              title: "Formation",
-              points: [
-                "Positive: have/has + past participle",
-                "Negative: have/has + not + past participle",
-                "Questions: have/has + subject + past participle",
-              ],
-            },
-            {
-              title: "Past Participle Forms",
-              points: [
-                "Regular verbs: verb + ed (worked, played)",
-                "Irregular verbs: special forms (gone, seen, eaten)",
-                "Common irregulars: be → been, do → done, go → gone",
-              ],
-            },
-            {
-              title: "Time Expressions",
-              points: [
-                "Ever, never",
-                "Already, yet",
-                "Just, recently",
-                "Since, for",
-                "So far, up to now",
-              ],
-            },
-          ],
-          exercises: [
-            {
-              question: "Complete: I _____ (never/visit) Australia.",
-              answer: "have never visited",
-              explanation: "Present perfect for experiences",
-            },
-            {
-              question: "Correct: She has finish her homework yet.",
-              answer: "She hasn't finished her homework yet.",
-              explanation: "Negative with 'yet'",
-            },
-            {
-              question: "Form a question: you / ever / be / to Paris",
-              answer: "Have you ever been to Paris?",
-              explanation: "Use 'Have' with 'you'",
-            },
-          ],
-          practice: [
-            "Talk about your life experiences",
-            "Discuss recent achievements",
-            "Share what you've learned this year",
-          ],
-        },
-      },
-      {
-        id: 6,
-        title: "Conditional Sentences",
-        description: "Talk about hypothetical situations",
-        difficulty: "Advanced",
-        duration: "30 min",
-        points: 40,
-        completed: false,
-        content: {
-          overview:
-            "Conditional sentences express hypothetical situations and their consequences.",
-          sections: [
-            {
-              title: "Zero Conditional",
-              points: [
-                "General truths: If you heat ice, it melts.",
-                "Form: If + present simple, present simple",
-              ],
-            },
-            {
-              title: "First Conditional",
-              points: [
-                "Real future possibilities: If it rains, we will cancel the picnic.",
-                "Form: If + present simple, will + base verb",
-              ],
-            },
-            {
-              title: "Second Conditional",
-              points: [
-                "Unreal present/future: If I had a million dollars, I would travel the world.",
-                "Form: If + past simple, would + base verb",
-              ],
-            },
-            {
-              title: "Third Conditional",
-              points: [
-                "Unreal past: If I had studied harder, I would have passed the exam.",
-                "Form: If + past perfect, would have + past participle",
-              ],
-            },
-          ],
-          exercises: [
-            {
-              question: "Complete: If I _____ (be) you, I _____ (study) more.",
-              answer: "were, would study",
-              explanation: "Second conditional for unreal present",
-            },
-            {
-              question:
-                "Complete: If she _____ (arrive) on time, she _____ (catch) the train.",
-              answer: "had arrived, would have caught",
-              explanation: "Third conditional for unreal past",
-            },
-            {
-              question: "Complete: If it _____ (rain), we _____ (stay) home.",
-              answer: "rains, will stay",
-              explanation: "First conditional for real future",
-            },
-          ],
-          practice: [
-            "Talk about your dreams and wishes",
-            "Discuss what you would do in different situations",
-            "Share regrets and what you would have done differently",
-          ],
-        },
-      },
     ],
     pronunciation: [
       {
-        id: 7,
+        id: 4,
         title: "Vowel Sounds",
         description: "Master English vowel sounds",
         difficulty: "Beginner",
-        duration: "20 min",
+        duration: "20 minutes",
         points: 25,
         completed: false,
+        color: colors.accent,
         content: {
           overview:
             "English has 12 pure vowel sounds. Mastering them is essential for clear pronunciation.",
@@ -723,13 +568,14 @@ const EnglishLearningPlatform = () => {
         },
       },
       {
-        id: 8,
+        id: 5,
         title: "Consonant Clusters",
         description: "Pronounce difficult combinations",
         difficulty: "Intermediate",
-        duration: "25 min",
+        duration: "25 minutes",
         points: 30,
-        completed: true,
+        completed: false,
+        color: colors.accentLight,
         content: {
           overview:
             "Consonant clusters are groups of consonants without vowels between them.",
@@ -797,87 +643,17 @@ const EnglishLearningPlatform = () => {
           ],
         },
       },
-      {
-        id: 9,
-        title: "Word Stress",
-        description: "Stress syllables correctly",
-        difficulty: "Intermediate",
-        duration: "20 min",
-        points: 30,
-        completed: false,
-        content: {
-          overview:
-            "English uses stress to distinguish between words and convey meaning.",
-          sections: [
-            {
-              title: "Basic Rules",
-              points: [
-                "Two-syllable nouns: stress first syllable (TAble, DOCtor)",
-                "Two-syllable verbs: stress second syllable (beGIN, preFER)",
-                "Three-syllable words ending in -y: stress first (COMpany, FAMily)",
-                "Words ending in -tion/-sion: stress syllable before (eduCAtion, deCIsion)",
-              ],
-            },
-            {
-              title: "Compound Words",
-              points: [
-                "Compound nouns: stress first word (BLACKboard, NOTEbook)",
-                "Adjective + noun: stress noun (big HOUSE, red CAR)",
-                "Verb + preposition: stress preposition (look OUT, give UP)",
-              ],
-            },
-            {
-              title: "Stress Patterns",
-              points: [
-                "Primary stress (loudest)",
-                "Secondary stress (medium)",
-                "Unstressed (weak)",
-                "Schwa sound /ə/ in unstressed syllables",
-              ],
-            },
-            {
-              title: "Practice Words",
-              points: [
-                "PHOtograph → phoTOgrapher → photoGRAphic",
-                "ECOnomy → ecoNOMic → econoMIcian",
-                "COMfort → COMfortable → comforTABly",
-              ],
-            },
-          ],
-          exercises: [
-            {
-              question: "Mark stress: 'photographic'",
-              answer: "photoGRAPHic",
-              explanation: "Stress on third syllable",
-            },
-            {
-              question: "Practice: 'comfortable'",
-              answer: "COMfortable",
-              explanation: "Stress on first syllable",
-            },
-            {
-              question: "Practice: 'economic', 'economical', 'economist'",
-              answer: "ecoNOMic, ecoNOMical, eCONomist",
-              explanation: "Stress shifts with different forms",
-            },
-          ],
-          practice: [
-            "Read poetry focusing on rhythm",
-            "Practice multisyllabic words",
-            "Record and check your stress patterns",
-          ],
-        },
-      },
     ],
     vocabulary: [
       {
-        id: 10,
+        id: 6,
         title: "Everyday Objects",
         description: "Names of common household items",
         difficulty: "Beginner",
-        duration: "15 min",
+        duration: "15 minutes",
         points: 20,
-        completed: true,
+        completed: false,
+        color: colors.primary,
         content: {
           overview:
             "Learn essential vocabulary for objects you encounter daily.",
@@ -948,13 +724,14 @@ const EnglishLearningPlatform = () => {
         },
       },
       {
-        id: 11,
+        id: 7,
         title: "Food & Drinks",
         description: "Expand food vocabulary",
         difficulty: "Beginner",
-        duration: "20 min",
+        duration: "20 minutes",
         points: 25,
         completed: false,
+        color: colors.secondary,
         content: {
           overview: "Essential vocabulary for food, drinks, and dining.",
           sections: [
@@ -1023,131 +800,66 @@ const EnglishLearningPlatform = () => {
           ],
         },
       },
-      {
-        id: 12,
-        title: "Work & Jobs",
-        description: "Professional vocabulary",
-        difficulty: "Intermediate",
-        duration: "25 min",
-        points: 30,
-        completed: false,
-        content: {
-          overview: "Vocabulary for the workplace and professional settings.",
-          sections: [
-            {
-              title: "Job Titles",
-              points: [
-                "Manager, director, executive",
-                "Engineer, developer, designer",
-                "Teacher, professor, instructor",
-                "Doctor, nurse, dentist",
-                "Accountant, lawyer, consultant",
-              ],
-            },
-            {
-              title: "Office Equipment",
-              points: [
-                "Computer, laptop, monitor",
-                "Printer, scanner, copier",
-                "Desk, chair, filing cabinet",
-                "Telephone, headset, conference phone",
-                "Whiteboard, marker, projector",
-              ],
-            },
-            {
-              title: "Business Terms",
-              points: [
-                "Meeting, conference, presentation",
-                "Deadline, schedule, timeline",
-                "Report, document, proposal",
-                "Budget, expense, invoice",
-                "Client, customer, stakeholder",
-              ],
-            },
-            {
-              title: "Work Activities",
-              points: [
-                "Attend, participate, contribute",
-                "Prepare, organize, coordinate",
-                "Submit, deliver, present",
-                "Discuss, negotiate, agree",
-                "Review, analyze, evaluate",
-              ],
-            },
-          ],
-          exercises: [
-            {
-              question: "Who leads a team?",
-              answer: "Manager",
-              explanation: "Manager is responsible for team leadership",
-            },
-            {
-              question: "What do you call money planned for a project?",
-              answer: "Budget",
-              explanation: "Budget is allocated money for specific purposes",
-            },
-            {
-              question: "What do you use to show presentations?",
-              answer: "Projector",
-              explanation: "For displaying presentations to groups",
-            },
-          ],
-          practice: [
-            "Describe your ideal job",
-            "Role-play a business meeting",
-            "Write a professional email",
-          ],
-        },
-      },
     ],
   };
 
-  // Daily Challenges
+  // Daily Challenges - Fixed to not be completed by default
   const [dailyChallenges, setDailyChallenges] = useState([
     {
       id: 1,
       title: "Complete 1 conversation practice",
+      description: "Practice speaking for at least 5 minutes",
       points: 50,
       completed: false,
+      color: colors.primary,
+      progress: 0,
+      total: 1,
+      type: "conversation",
     },
     {
       id: 2,
-      title: "Learn 10 new vocabulary words",
+      title: "Learn 5 new vocabulary words",
+      description: "Study and memorize new words",
       points: 40,
-      completed: true,
+      completed: false,
+      color: colors.secondary,
+      progress: 0,
+      total: 5,
+      type: "vocabulary",
     },
     {
       id: 3,
-      title: "Practice pronunciation for 5 minutes",
+      title: "Practice pronunciation for 3 minutes",
+      description: "Work on your accent and pronunciation",
       points: 30,
       completed: false,
+      color: colors.accent,
+      progress: 0,
+      total: 3,
+      type: "pronunciation",
     },
-    { id: 4, title: "Complete 1 grammar lesson", points: 35, completed: true },
+    {
+      id: 4,
+      title: "Complete 1 grammar lesson",
+      description: "Study one grammar topic thoroughly",
+      points: 35,
+      completed: false,
+      color: colors.info,
+      progress: 0,
+      total: 1,
+      type: "grammar",
+    },
   ]);
 
   // Recent Activities
-  const [recentActivities, setRecentActivities] = useState([
-    {
-      id: 1,
-      action: "Completed Present Continuous lesson",
-      time: "2 hours ago",
-      points: 25,
-    },
-    {
-      id: 2,
-      action: "Practiced Daily Conversations scenario",
-      time: "Yesterday",
-      points: 50,
-    },
-    { id: 3, action: "Reached Level 3", time: "3 days ago", points: 100 },
-    { id: 4, action: "12-day streak achieved", time: "Today", points: 75 },
-  ]);
+  const [recentActivities, setRecentActivities] = useState([]);
 
   // Load user data
   useEffect(() => {
     const savedData = localStorage.getItem("englishLearningData");
     const savedActivities = localStorage.getItem("recentActivities");
     const savedChallenges = localStorage.getItem("dailyChallenges");
+    const savedLessons = localStorage.getItem("completedLessons");
 
     if (savedData) {
       const parsedData = JSON.parse(savedData);
@@ -1162,6 +874,10 @@ const EnglishLearningPlatform = () => {
       setDailyChallenges(JSON.parse(savedChallenges));
     }
 
+    if (savedLessons) {
+      setCompletedLessons(JSON.parse(savedLessons));
+    }
+
     setConversation([
       {
         id: 1,
@@ -1173,6 +889,11 @@ const EnglishLearningPlatform = () => {
         }),
       },
     ]);
+
+    // Check for speech synthesis support
+    if (!window.speechSynthesis) {
+      console.warn("Speech synthesis not supported in this browser");
+    }
   }, []);
 
   // Save user data
@@ -1180,7 +901,32 @@ const EnglishLearningPlatform = () => {
     localStorage.setItem("englishLearningData", JSON.stringify(user));
     localStorage.setItem("recentActivities", JSON.stringify(recentActivities));
     localStorage.setItem("dailyChallenges", JSON.stringify(dailyChallenges));
-  }, [user, recentActivities, dailyChallenges]);
+    localStorage.setItem("completedLessons", JSON.stringify(completedLessons));
+  }, [user, recentActivities, dailyChallenges, completedLessons]);
+
+  // Handle scroll for header
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setIsSidebarOpen(true);
+      } else {
+        setIsSidebarOpen(false);
+      }
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // Scroll to bottom of conversation
   useEffect(() => {
@@ -1199,160 +945,241 @@ const EnglishLearningPlatform = () => {
     };
   }, []);
 
-  // Sidebar Component
+  // Sidebar Component - Fixed for Mobile
   const Sidebar = () => (
-    <div
-      className={`bg-gray-900 text-white h-screen fixed left-0 top-0 z-40 transition-all duration-300 ${
-        isSidebarOpen ? "w-64" : "w-20"
-      } overflow-hidden`}
-    >
-      <div className="p-6 border-b border-gray-800">
-        <div className="flex items-center space-x-3">
-          <div className="bg-blue-600 w-10 h-10 rounded-lg flex items-center justify-center">
-            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-              <path
-                fillRule="evenodd"
-                d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </div>
-          {isSidebarOpen && (
-            <div>
-              <h1 className="text-lg font-semibold">English Master</h1>
-              <p className="text-xs text-gray-400">AI Learning Platform</p>
-            </div>
-          )}
-        </div>
-      </div>
+    <>
+      {/* Mobile Overlay - Fixed */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
 
-      <div className="p-4">
-        <nav className="space-y-1">
-          {[
-            {
-              id: "dashboard",
-              label: "Dashboard",
-              icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6",
-            },
-            {
-              id: "practice",
-              label: "Practice",
-              icon: "M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z",
-            },
-            {
-              id: "resources",
-              label: "Resources",
-              icon: "M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253",
-            },
-            {
-              id: "progress",
-              label: "Progress",
-              icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z",
-            },
-          ].map((item) => (
-            <button
-              key={item.id}
-              onClick={() => {
-                if (item.id !== "practice") resetPractice();
-                setActivePage(item.id);
-              }}
-              className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-all ${
-                activePage === item.id
-                  ? "bg-blue-600 text-white"
-                  : "hover:bg-gray-800 text-gray-300"
-              }`}
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+      <aside
+        className={`
+          fixed top-0 left-0 z-40 h-screen transition-all duration-300 ease-in-out
+          ${isSidebarOpen ? "w-64" : "w-0"} 
+          ${mobileMenuOpen ? "w-64" : ""}
+          bg-white border-r border-gray-200 overflow-hidden
+          lg:block
+        `}
+      >
+        <div className="h-full flex flex-col">
+          {/* Logo Section */}
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div
+                  className="w-10 h-10 rounded-lg flex items-center justify-center text-white"
+                  style={{ backgroundColor: colors.primary }}
+                >
+                  <svg
+                    className="w-6 h-6"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                    <path
+                      fillRule="evenodd"
+                      d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h1 className="text-lg font-bold text-gray-900">
+                    English Pro
+                  </h1>
+                  <p className="text-sm text-gray-500">Learning Platform</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className="lg:hidden text-gray-500 hover:text-gray-700"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d={item.icon}
-                />
-              </svg>
-              {isSidebarOpen && (
-                <span className="font-medium">{item.label}</span>
-              )}
-            </button>
-          ))}
-        </nav>
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
 
-        <div className="mt-8 pt-6 border-t border-gray-800">
-          <div className="px-3">
-            {isSidebarOpen && (
-              <h3 className="text-xs font-semibold text-gray-400 mb-3">
-                PROGRESS
+          {/* Navigation */}
+          <div className="flex-1 overflow-y-auto">
+            <nav className="p-4 space-y-1">
+              {[
+                {
+                  id: "dashboard",
+                  label: "Dashboard",
+                  icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6",
+                },
+                {
+                  id: "practice",
+                  label: "Practice",
+                  icon: "M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z",
+                },
+                {
+                  id: "resources",
+                  label: "Resources",
+                  icon: "M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253",
+                },
+                {
+                  id: "progress",
+                  label: "Progress",
+                  icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z",
+                },
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    if (item.id !== "practice") resetPractice();
+                    setActivePage(item.id);
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`
+                    w-full flex items-center space-x-3 p-3 rounded-lg transition-all
+                    ${
+                      activePage === item.id
+                        ? "text-white"
+                        : "text-gray-600 hover:bg-gray-50"
+                    }
+                  `}
+                  style={{
+                    backgroundColor:
+                      activePage === item.id ? colors.primary : "transparent",
+                  }}
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d={item.icon}
+                    />
+                  </svg>
+                  <span className="font-medium">{item.label}</span>
+                </button>
+              ))}
+            </nav>
+
+            {/* Progress Section */}
+            <div className="mt-8 px-4">
+              <h3 className="text-xs font-semibold text-gray-500 mb-4 uppercase tracking-wider">
+                Progress Overview
               </h3>
-            )}
-            <div className="space-y-4">
-              <div>
-                <div className="flex justify-between mb-1">
-                  {isSidebarOpen && (
-                    <span className="text-sm text-gray-400">
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between mb-2">
+                    <span className="text-sm text-gray-600">
                       Level {user.level}
                     </span>
-                  )}
-                  <span className="text-sm font-medium text-blue-400">
-                    {user.levelProgress}%
-                  </span>
-                </div>
-                <div className="w-full bg-gray-800 rounded-full h-2">
-                  <div
-                    className="bg-blue-600 h-2 rounded-full"
-                    style={{ width: `${user.levelProgress}%` }}
-                  ></div>
-                </div>
-              </div>
-
-              <div className="bg-gray-800 rounded-lg p-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-lg font-bold">{user.points}</div>
-                    {isSidebarOpen && (
-                      <div className="text-xs text-gray-400">Points</div>
-                    )}
-                  </div>
-                  <div className="text-yellow-500">
-                    <svg
-                      className="w-5 h-5"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
+                    <span
+                      className="text-sm font-medium"
+                      style={{ color: colors.primary }}
                     >
-                      <path
-                        fillRule="evenodd"
-                        d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+                      {user.levelProgress}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="h-2 rounded-full transition-all duration-500"
+                      style={{
+                        width: `${user.levelProgress}%`,
+                        backgroundColor: colors.primary,
+                      }}
+                    ></div>
+                  </div>
+                </div>
+
+                <div
+                  className="rounded-lg p-4"
+                  style={{ backgroundColor: colors.gray50 }}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div
+                        className="text-lg font-bold"
+                        style={{ color: colors.primary }}
+                      >
+                        {user.points}
+                      </div>
+                      <div className="text-sm text-gray-500">Points</div>
+                    </div>
+                    <div style={{ color: colors.accent }}>
+                      <svg
+                        className="w-5 h-5"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* User Profile */}
+          <div className="p-4 border-t border-gray-200">
+            <div className="flex items-center space-x-3">
+              <div
+                className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-semibold"
+                style={{ backgroundColor: user.avatarColor }}
+              >
+                {user.name.charAt(0)}
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-gray-900">{user.name}</p>
+                <p className="text-sm text-gray-500">
+                  Level {user.level} Learner
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      </aside>
+    </>
   );
 
   // Fixed Header Component
   const Header = () => (
     <header
-      className={`bg-white border-b border-gray-200 fixed top-0 right-0 left-0 z-30 transition-all duration-300 ${
-        isSidebarOpen ? "left-64" : "left-20"
-      } ${isScrolled ? "shadow-md" : ""}`}
+      className={`
+        bg-white border-b border-gray-200 fixed top-0 z-30 
+        transition-all duration-300 ease-in-out
+        ${isSidebarOpen ? "left-0 lg:left-64" : "left-0"}
+        right-0
+        ${isScrolled ? "shadow-sm" : ""}
+      `}
     >
-      <div className="px-6 py-4">
+      <div className="px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
+            {/* Mobile Menu Button */}
             <button
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="text-gray-600 hover:text-gray-900"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden text-gray-600 hover:text-gray-900"
             >
               <svg
                 className="w-6 h-6"
@@ -1364,12 +1191,18 @@ const EnglishLearningPlatform = () => {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
+                  d={
+                    mobileMenuOpen
+                      ? "M6 18L18 6M6 6l12 12"
+                      : "M4 6h16M4 12h16M4 18h16"
+                  }
                 />
               </svg>
             </button>
+
+            {/* Page Title */}
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">
+              <h2 className="text-xl font-bold text-gray-900">
                 {activePage === "dashboard" && "Dashboard"}
                 {activePage === "practice" && "Practice Sessions"}
                 {activePage === "resources" && "Learning Resources"}
@@ -1388,23 +1221,49 @@ const EnglishLearningPlatform = () => {
             </div>
           </div>
 
+          {/* User Info and Actions */}
           <div className="flex items-center space-x-4">
-            <div className="hidden md:flex items-center space-x-3">
-              <div className="text-right">
+            {/* Points Display */}
+            <div
+              className="hidden md:flex items-center space-x-2 px-3 py-2 rounded-lg"
+              style={{ backgroundColor: colors.gray50 }}
+            >
+              <span style={{ color: colors.primary }} className="font-bold">
+                {user.points}
+              </span>
+              <span className="text-sm text-gray-600">Points</span>
+            </div>
+
+            {/* Streak Display */}
+            <div
+              className="hidden sm:flex items-center space-x-2 px-3 py-2 rounded-lg"
+              style={{ backgroundColor: colors.gray50 }}
+            >
+              <span style={{ color: colors.accent }} className="font-bold">
+                {user.streak}
+              </span>
+              <span className="text-sm text-gray-600">Day Streak</span>
+            </div>
+
+            {/* User Profile */}
+            <div className="flex items-center space-x-3">
+              <div className="hidden md:block text-right">
                 <div className="text-sm font-medium text-gray-900">
                   {user.name}
                 </div>
-                <div className="text-xs text-gray-600">
-                  <span className="text-yellow-600">
-                    🔥 {user.streak} day streak
-                  </span>
-                </div>
+                <div className="text-sm text-gray-600">Level {user.level}</div>
               </div>
               <div className="relative">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
+                <div
+                  className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-semibold"
+                  style={{ backgroundColor: user.avatarColor }}
+                >
                   {user.name.charAt(0)}
                 </div>
-                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+                <div
+                  className="absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white"
+                  style={{ backgroundColor: colors.success }}
+                ></div>
               </div>
             </div>
           </div>
@@ -1416,39 +1275,95 @@ const EnglishLearningPlatform = () => {
   // Main Content Wrapper
   const MainContent = () => (
     <div
-      className={`min-h-screen bg-gray-50 transition-all duration-300 ${
-        isSidebarOpen ? "ml-64" : "ml-20"
-      }`}
+      className={`
+        min-h-screen transition-all duration-300 ease-in-out
+        ${isSidebarOpen ? "pt-20 lg:ml-64" : "pt-20"}
+      `}
+      style={{ backgroundColor: colors.background }}
     >
-      <div className="pt-20 px-6 pb-8">{renderContent()}</div>
+      <div className="p-4 lg:p-6">{renderContent()}</div>
     </div>
   );
 
   // Add activity
-  const addActivity = (action, points = 0) => {
+  const addActivity = (action, description, points = 0, type = "activity") => {
     const newActivity = {
       id: recentActivities.length + 1,
       action,
+      description,
       time: "Just now",
       points,
+      type,
     };
-    setRecentActivities((prev) => [newActivity, ...prev.slice(0, 4)]);
+    setRecentActivities((prev) => [newActivity, ...prev.slice(0, 5)]);
   };
 
-  // Complete challenge
-  const completeChallenge = (challengeId) => {
+  // Update challenge progress
+  const updateChallengeProgress = (challengeId, progress) => {
     setDailyChallenges((prev) =>
       prev.map((challenge) =>
         challenge.id === challengeId
-          ? { ...challenge, completed: true }
+          ? {
+              ...challenge,
+              progress: Math.min(challenge.total, progress),
+              completed: Math.min(challenge.total, progress) >= challenge.total,
+            }
           : challenge
       )
     );
+  };
 
+  // Complete challenge manually
+  const completeChallenge = (challengeId) => {
     const challenge = dailyChallenges.find((c) => c.id === challengeId);
-    if (challenge) {
-      setUser((prev) => ({ ...prev, points: prev.points + challenge.points }));
-      addActivity(`Completed challenge: ${challenge.title}`, challenge.points);
+    if (!challenge) return;
+
+    // Only complete if progress is at least 80%
+    if (challenge.progress >= challenge.total * 0.8) {
+      setDailyChallenges((prev) =>
+        prev.map((c) =>
+          c.id === challengeId
+            ? { ...c, completed: true, progress: c.total }
+            : c
+        )
+      );
+
+      setUser((prev) => ({
+        ...prev,
+        points: prev.points + challenge.points,
+        dailyGoalProgress: prev.dailyGoalProgress + 1,
+      }));
+
+      addActivity(
+        `Completed challenge: ${challenge.title}`,
+        challenge.description,
+        challenge.points,
+        "challenge"
+      );
+
+      // Add notification
+      setNotifications((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          text: `Challenge completed! +${challenge.points} points`,
+          type: "success",
+          read: false,
+        },
+      ]);
+    } else {
+      // Add notification that challenge is not ready to complete
+      setNotifications((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          text: `Complete ${challenge.total - challenge.progress} more ${
+            challenge.type
+          } to finish this challenge`,
+          type: "info",
+          read: false,
+        },
+      ]);
     }
   };
 
@@ -1485,7 +1400,12 @@ const EnglishLearningPlatform = () => {
     setCurrentStatus("Ready to speak - Click 'Start Speaking' to begin");
     setActivePage("practice");
     isMicrophoneManuallyStopped.current = false;
-    addActivity(`Started ${scenario.title} practice session`);
+    addActivity(
+      `Started ${scenario.title} practice session`,
+      scenario.description,
+      0,
+      "practice"
+    );
   };
 
   // Stop microphone completely
@@ -1606,6 +1526,7 @@ const EnglishLearningPlatform = () => {
         levelProgress: newLevelProgress,
         sessionsCompleted: prev.sessionsCompleted + 1,
         accuracyRate: Math.min(100, prev.accuracyRate + 0.5),
+        totalPracticeHours: prev.totalPracticeHours + 0.1,
       };
     });
 
@@ -1613,11 +1534,11 @@ const EnglishLearningPlatform = () => {
       ...prev,
       speaking: Math.min(100, prev.speaking + 2),
       fluency: Math.min(100, prev.fluency + 1),
+      listening: Math.min(100, prev.listening + 1),
     }));
 
-    if (messageCount >= 5 && !dailyChallenges[0].completed) {
-      completeChallenge(1);
-    }
+    // Update conversation challenge progress
+    updateChallengeProgress(1, messageCount + 1);
   };
 
   // Stop listening manually
@@ -1819,6 +1740,7 @@ const EnglishLearningPlatform = () => {
           points: newPoints,
           level: newLevel,
           levelProgress: newLevelProgress,
+          totalPracticeHours: prev.totalPracticeHours + 0.05,
         };
       });
 
@@ -1832,9 +1754,9 @@ const EnglishLearningPlatform = () => {
 
       setCurrentStatus("Pronunciation analyzed!");
 
-      if (!dailyChallenges[2].completed && pronunciationResults.length >= 3) {
-        completeChallenge(3);
-      }
+      // Update pronunciation challenge progress
+      const currentProgress = dailyChallenges[2].progress + 1;
+      updateChallengeProgress(3, currentProgress);
     };
 
     pronunciationRecognitionRef.current.onerror = () => {
@@ -1917,6 +1839,7 @@ const EnglishLearningPlatform = () => {
         level: newLevel,
         levelProgress: newLevelProgress,
         sessionsCompleted: prev.sessionsCompleted + 1,
+        totalPracticeHours: prev.totalPracticeHours + 0.2,
       };
     });
 
@@ -1925,11 +1848,15 @@ const EnglishLearningPlatform = () => {
       [category]: Math.min(100, prev[category] + 10),
     }));
 
-    if (category === "grammar" && !dailyChallenges[3].completed) {
-      completeChallenge(4);
-    }
+    // Update grammar challenge progress
+    updateChallengeProgress(4, 1);
 
-    addActivity(`Completed lesson: ${lesson.title}`, lesson.points);
+    addActivity(
+      `Completed lesson: ${lesson.title}`,
+      lesson.description,
+      lesson.points,
+      "lesson"
+    );
     return true;
   };
 
@@ -1999,6 +1926,7 @@ const EnglishLearningPlatform = () => {
         "Use pronunciation exercises regularly",
       ],
       feedback: `Great work! You completed ${messageCount} conversation exchanges and ${pronunciationResults.length} pronunciation exercises.`,
+      totalPoints: messageCount * 10,
     };
 
     setSessionSummary(summary);
@@ -2009,12 +1937,19 @@ const EnglishLearningPlatform = () => {
     if (lastPracticeDate !== today) {
       setUser((prev) => ({ ...prev, streak: prev.streak + 1 }));
       localStorage.setItem("lastPracticeDate", today);
-      addActivity("Maintained daily streak", 25);
+      addActivity(
+        "Maintained daily streak",
+        "Practice for consecutive days",
+        25,
+        "streak"
+      );
     }
 
     addActivity(
       `Completed ${selectedScenario?.title} practice session`,
-      messageCount * 10
+      `Scored ${finalScore}/100 points`,
+      messageCount * 10,
+      "practice"
     );
   };
 
@@ -2082,8 +2017,8 @@ const EnglishLearningPlatform = () => {
     };
 
     return (
-      <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-        <div className="relative top-20 mx-auto p-6 border w-11/12 max-w-6xl shadow-xl rounded-lg bg-white">
+      <div className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div className="relative top-4 mx-auto p-4 border w-full max-w-6xl shadow-xl rounded-lg bg-white">
           <div className="flex justify-between items-start mb-6">
             <div className="flex-1">
               <h2 className="text-2xl font-bold text-gray-900">
@@ -2134,14 +2069,20 @@ const EnglishLearningPlatform = () => {
               <span className="text-sm font-medium text-gray-700">
                 Progress
               </span>
-              <span className="text-sm font-bold text-blue-600">
+              <span
+                className="text-sm font-bold"
+                style={{ color: colors.primary }}
+              >
                 {calculateProgress()}%
               </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div
-                className="bg-blue-600 h-2 rounded-full transition-all duration-500"
-                style={{ width: `${calculateProgress()}%` }}
+                className="h-2 rounded-full transition-all duration-500"
+                style={{
+                  width: `${calculateProgress()}%`,
+                  backgroundColor: colors.primary,
+                }}
               ></div>
             </div>
           </div>
@@ -2149,8 +2090,16 @@ const EnglishLearningPlatform = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Content */}
             <div className="lg:col-span-2">
-              <div className="bg-blue-50 rounded-lg p-5 mb-6">
-                <h3 className="font-bold text-blue-800 mb-2">Overview</h3>
+              <div
+                className="rounded-lg p-5 mb-6"
+                style={{ backgroundColor: colors.gray50 }}
+              >
+                <h3
+                  className="font-bold mb-2"
+                  style={{ color: colors.primary }}
+                >
+                  Overview
+                </h3>
                 <p className="text-gray-700">{lesson.content.overview}</p>
               </div>
 
@@ -2170,7 +2119,10 @@ const EnglishLearningPlatform = () => {
                     {lesson.content.sections[currentSection].points.map(
                       (point, idx) => (
                         <li key={idx} className="flex items-start">
-                          <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                          <div
+                            className="w-2 h-2 rounded-full mt-2 mr-3 flex-shrink-0"
+                            style={{ backgroundColor: colors.primary }}
+                          ></div>
                           <span className="text-gray-700">{point}</span>
                         </li>
                       )
@@ -2183,11 +2135,14 @@ const EnglishLearningPlatform = () => {
                   <button
                     onClick={handlePrevSection}
                     disabled={currentSection === 0}
-                    className={`px-4 py-2 rounded ${
-                      currentSection === 0
-                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                    }`}
+                    className={`
+                      px-4 py-2 rounded-lg font-medium
+                      ${
+                        currentSection === 0
+                          ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      }
+                    `}
                   >
                     Previous
                   </button>
@@ -2196,11 +2151,20 @@ const EnglishLearningPlatform = () => {
                     disabled={
                       currentSection === lesson.content.sections.length - 1
                     }
-                    className={`px-4 py-2 rounded ${
-                      currentSection === lesson.content.sections.length - 1
-                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                        : "bg-blue-600 text-white hover:bg-blue-700"
-                    }`}
+                    className={`
+                      px-4 py-2 rounded-lg font-medium text-white
+                      ${
+                        currentSection === lesson.content.sections.length - 1
+                          ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                          : "hover:opacity-90"
+                      }
+                    `}
+                    style={{
+                      backgroundColor:
+                        currentSection === lesson.content.sections.length - 1
+                          ? colors.gray100
+                          : colors.primary,
+                    }}
                   >
                     Next Section
                   </button>
@@ -2233,31 +2197,46 @@ const EnglishLearningPlatform = () => {
                                   handleExerciseAnswer(index, e.target.value)
                                 }
                                 placeholder="Type your answer here..."
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                               />
                             </div>
                             <button
                               onClick={() => toggleAnswer(index)}
-                              className="text-sm text-blue-600 hover:text-blue-800"
+                              className="text-sm font-medium"
+                              style={{ color: colors.primary }}
                             >
                               {showAnswers[index]
                                 ? "Hide Answer"
                                 : "Show Answer"}
                             </button>
                             {showAnswers[index] && (
-                              <div className="mt-3 p-3 bg-green-50 rounded-lg">
-                                <p className="text-green-800 font-medium">
+                              <div
+                                className="mt-3 p-4 rounded-lg"
+                                style={{
+                                  backgroundColor: colors.successLighter,
+                                }}
+                              >
+                                <p
+                                  className="font-medium"
+                                  style={{ color: colors.success }}
+                                >
                                   Answer: {exercise.answer}
                                 </p>
-                                <p className="text-green-700 text-sm mt-1">
+                                <p
+                                  className="text-sm mt-1"
+                                  style={{ color: colors.secondary }}
+                                >
                                   {exercise.explanation}
                                 </p>
                               </div>
                             )}
                           </>
                         ) : (
-                          <div className="p-3 bg-blue-50 rounded-lg">
-                            <p className="text-blue-800">
+                          <div
+                            className="p-4 rounded-lg"
+                            style={{ backgroundColor: colors.infoLighter }}
+                          >
+                            <p style={{ color: colors.info }}>
                               {exercise.explanation}
                             </p>
                           </div>
@@ -2281,19 +2260,41 @@ const EnglishLearningPlatform = () => {
                     <button
                       key={index}
                       onClick={() => setCurrentSection(index)}
-                      className={`w-full text-left p-3 rounded ${
-                        currentSection === index
-                          ? "bg-blue-50 border border-blue-200"
-                          : "hover:bg-gray-50"
-                      }`}
+                      className={`
+                        w-full text-left p-3 rounded-lg transition-all
+                        ${
+                          currentSection === index
+                            ? "border"
+                            : "hover:bg-gray-50"
+                        }
+                      `}
+                      style={{
+                        backgroundColor:
+                          currentSection === index
+                            ? colors.infoLighter
+                            : "transparent",
+                        borderColor:
+                          currentSection === index
+                            ? colors.info
+                            : "transparent",
+                      }}
                     >
                       <div className="flex items-center">
                         <div
-                          className={`w-6 h-6 rounded-full flex items-center justify-center mr-3 ${
-                            currentSection === index
-                              ? "bg-blue-600 text-white"
-                              : "bg-gray-200 text-gray-600"
-                          }`}
+                          className={`
+                            w-6 h-6 rounded-full flex items-center justify-center mr-3 text-sm font-medium
+                            ${
+                              currentSection === index
+                                ? "text-white"
+                                : "bg-gray-200 text-gray-600"
+                            }
+                          `}
+                          style={{
+                            backgroundColor:
+                              currentSection === index
+                                ? colors.primary
+                                : colors.gray200,
+                          }}
                         >
                           {index + 1}
                         </div>
@@ -2320,7 +2321,10 @@ const EnglishLearningPlatform = () => {
                 <div className="space-y-3">
                   {lesson.content.practice?.map((activity, index) => (
                     <div key={index} className="flex items-start">
-                      <div className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3"></div>
+                      <div
+                        className="w-2 h-2 rounded-full mt-2 mr-3"
+                        style={{ backgroundColor: colors.success }}
+                      ></div>
                       <span className="text-gray-700 text-sm">{activity}</span>
                     </div>
                   ))}
@@ -2341,7 +2345,8 @@ const EnglishLearningPlatform = () => {
                     }
                     onClose();
                   }}
-                  className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                  className="w-full py-3 text-white font-medium rounded-lg transition-all hover:opacity-90"
+                  style={{ backgroundColor: colors.primary }}
                 >
                   Save Progress
                 </button>
@@ -2350,13 +2355,14 @@ const EnglishLearningPlatform = () => {
                     completeLesson(lesson.id, activeResourceTab);
                     onClose();
                   }}
-                  className="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors"
+                  className="w-full py-3 text-white font-medium rounded-lg transition-all hover:opacity-90"
+                  style={{ backgroundColor: colors.success }}
                 >
                   Mark as Completed
                 </button>
                 <button
                   onClick={onClose}
-                  className="w-full py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-lg transition-colors"
+                  className="w-full py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-lg transition-all"
                 >
                   Close Lesson
                 </button>
@@ -2372,17 +2378,23 @@ const EnglishLearningPlatform = () => {
   const DashboardView = () => (
     <div className="space-y-6">
       {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-6 text-white">
-        <div className="flex flex-col md:flex-row items-start justify-between">
-          <div className="mb-6 md:mb-0">
+      <div
+        className="rounded-xl p-6 text-white"
+        style={{
+          background: `linear-gradient(135deg, ${colors.primary}, ${colors.primaryLight})`,
+        }}
+      >
+        <div className="flex flex-col lg:flex-row items-start justify-between">
+          <div className="mb-6 lg:mb-0">
             <h2 className="text-2xl font-bold mb-2">
               Welcome back, {user.name}!
             </h2>
             <p className="text-blue-100">
-              Continue your English learning journey. Your progress looks great!
+              Start your English learning journey today. Track your progress and
+              improve your skills.
             </p>
-            <div className="mt-4">
-              <div className="flex items-center space-x-4">
+            <div className="mt-6">
+              <div className="flex flex-wrap gap-4">
                 <div className="bg-white/20 backdrop-blur-sm px-4 py-3 rounded-lg">
                   <div className="text-xl font-bold">{user.points}</div>
                   <div className="text-sm">Total Points</div>
@@ -2400,7 +2412,8 @@ const EnglishLearningPlatform = () => {
           </div>
           <button
             onClick={() => setActivePage("practice")}
-            className="bg-white text-blue-600 hover:bg-gray-100 font-semibold px-6 py-3 rounded-lg transition-colors"
+            className="bg-white hover:bg-gray-100 text-gray-900 font-semibold px-6 py-3 rounded-lg transition-all"
+            style={{ color: colors.primary }}
           >
             Start Practice Session
           </button>
@@ -2420,14 +2433,17 @@ const EnglishLearningPlatform = () => {
               <div>
                 <div className="flex justify-between text-sm text-gray-600 mb-2">
                   <span>Level {user.level} Progress</span>
-                  <span className="font-bold text-blue-600">
+                  <span className="font-bold" style={{ color: colors.primary }}>
                     {user.levelProgress}%
                   </span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-3">
                   <div
-                    className="bg-blue-600 h-3 rounded-full transition-all duration-500"
-                    style={{ width: `${user.levelProgress}%` }}
+                    className="h-3 rounded-full transition-all duration-500"
+                    style={{
+                      width: `${user.levelProgress}%`,
+                      backgroundColor: colors.primary,
+                    }}
                   ></div>
                 </div>
                 <div className="text-sm text-gray-500 mt-2">
@@ -2435,17 +2451,29 @@ const EnglishLearningPlatform = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-blue-50 rounded-lg p-4">
-                  <div className="text-xl font-bold text-blue-700">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div
+                  className="rounded-lg p-4"
+                  style={{ backgroundColor: colors.blue50 }}
+                >
+                  <div
+                    className="text-xl font-bold"
+                    style={{ color: colors.blue700 }}
+                  >
                     {user.sessionsCompleted}
                   </div>
                   <div className="text-sm text-gray-600">
                     Sessions Completed
                   </div>
                 </div>
-                <div className="bg-green-50 rounded-lg p-4">
-                  <div className="text-xl font-bold text-green-700">
+                <div
+                  className="rounded-lg p-4"
+                  style={{ backgroundColor: colors.green50 }}
+                >
+                  <div
+                    className="text-xl font-bold"
+                    style={{ color: colors.green700 }}
+                  >
                     {user.accuracyRate}%
                   </div>
                   <div className="text-sm text-gray-600">Accuracy Rate</div>
@@ -2511,41 +2539,49 @@ const EnglishLearningPlatform = () => {
               </span>
             </div>
             <div className="space-y-3">
-              {recentActivities.map((activity) => (
-                <div
-                  key={activity.id}
-                  className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg"
-                >
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center">
-                      <svg
-                        className="w-4 h-4"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    </div>
-                    <div>
-                      <div className="font-medium text-gray-900">
-                        {activity.action}
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        {activity.time}
-                      </div>
-                    </div>
-                  </div>
-                  {activity.points > 0 && (
-                    <div className="text-green-600 font-bold">
-                      +{activity.points}
-                    </div>
-                  )}
+              {recentActivities.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-500">
+                    No activities yet. Start learning to see your progress here!
+                  </p>
                 </div>
-              ))}
+              ) : (
+                recentActivities.map((activity) => (
+                  <div
+                    key={activity.id}
+                    className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center">
+                        <svg
+                          className="w-4 h-4"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </div>
+                      <div>
+                        <div className="font-medium text-gray-900">
+                          {activity.action}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          {activity.time}
+                        </div>
+                      </div>
+                    </div>
+                    {activity.points > 0 && (
+                      <div className="text-green-600 font-bold">
+                        +{activity.points}
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
@@ -2579,16 +2615,45 @@ const EnglishLearningPlatform = () => {
                       +{challenge.points}
                     </div>
                   </div>
+                  <div className="text-sm text-gray-600 mb-2">
+                    {challenge.description}
+                  </div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-xs text-gray-500">
+                      Progress: {challenge.progress}/{challenge.total}
+                    </div>
+                    <div className="text-xs font-medium">
+                      {Math.round((challenge.progress / challenge.total) * 100)}
+                      %
+                    </div>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
+                    <div
+                      className="h-2 rounded-full transition-all duration-500"
+                      style={{
+                        width: `${
+                          (challenge.progress / challenge.total) * 100
+                        }%`,
+                        backgroundColor: challenge.color,
+                      }}
+                    ></div>
+                  </div>
                   <button
                     onClick={() => completeChallenge(challenge.id)}
                     disabled={challenge.completed}
-                    className={`w-full py-1 rounded text-sm font-medium ${
+                    className={`w-full py-2 rounded text-sm font-medium ${
                       challenge.completed
                         ? "bg-green-100 text-green-800"
-                        : "bg-blue-600 hover:bg-blue-700 text-white"
+                        : challenge.progress >= challenge.total * 0.8
+                        ? "bg-blue-600 hover:bg-blue-700 text-white"
+                        : "bg-gray-300 text-gray-600 cursor-not-allowed"
                     }`}
                   >
-                    {challenge.completed ? "Completed" : "Start"}
+                    {challenge.completed
+                      ? "Completed"
+                      : challenge.progress >= challenge.total * 0.8
+                      ? "Complete Challenge"
+                      : "In Progress"}
                   </button>
                 </div>
               ))}
@@ -2613,8 +2678,11 @@ const EnglishLearningPlatform = () => {
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-500"
-                      style={{ width: `${value}%` }}
+                      className="h-2 rounded-full transition-all duration-500"
+                      style={{
+                        width: `${value}%`,
+                        backgroundColor: colors.primary,
+                      }}
                     ></div>
                   </div>
                 </div>
@@ -2623,7 +2691,12 @@ const EnglishLearningPlatform = () => {
           </div>
 
           {/* Quick Resources */}
-          <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-6 text-white">
+          <div
+            className="rounded-lg p-6 text-white"
+            style={{
+              background: `linear-gradient(135deg, ${colors.primary}, ${colors.primaryLight})`,
+            }}
+          >
             <h3 className="text-lg font-bold mb-3">Continue Learning</h3>
             <p className="text-blue-100 mb-4">Pick up where you left off</p>
             <button
@@ -2638,7 +2711,7 @@ const EnglishLearningPlatform = () => {
     </div>
   );
 
-  // Practice View with Fixed Controls
+  // Practice View
   const PracticeView = () => {
     if (selectedScenario && showSummary && sessionSummary) {
       return (
@@ -3515,32 +3588,38 @@ const EnglishLearningPlatform = () => {
           <div className="space-y-3">
             <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-lg">
               <div className="w-12 h-12 bg-green-600 text-white rounded-full flex items-center justify-center font-bold">
-                12
+                {user.streak}
               </div>
               <div>
-                <div className="font-medium text-gray-900">12-Day Streak</div>
+                <div className="font-medium text-gray-900">
+                  {user.streak}-Day Streak
+                </div>
                 <div className="text-sm text-gray-600">
-                  Practice for 12 consecutive days
+                  Practice for {user.streak} consecutive days
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
               <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">
-                42
+                {user.sessionsCompleted}
               </div>
               <div>
-                <div className="font-medium text-gray-900">42 Sessions</div>
+                <div className="font-medium text-gray-900">
+                  {user.sessionsCompleted} Sessions
+                </div>
                 <div className="text-sm text-gray-600">
-                  Complete 42 practice sessions
+                  Complete {user.sessionsCompleted} practice sessions
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg">
               <div className="w-12 h-12 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold">
-                82
+                {user.accuracyRate}
               </div>
               <div>
-                <div className="font-medium text-gray-900">82% Accuracy</div>
+                <div className="font-medium text-gray-900">
+                  {user.accuracyRate}% Accuracy
+                </div>
                 <div className="text-sm text-gray-600">
                   Achieve high pronunciation accuracy
                 </div>
@@ -3560,7 +3639,7 @@ const EnglishLearningPlatform = () => {
                   Daily Practice
                 </span>
                 <span className="text-sm font-bold text-blue-600">
-                  {user.sessionsCompleted}/{user.dailyGoal}
+                  {user.dailyGoalProgress}/{user.dailyGoal}
                 </span>
               </div>
               <div className="w-full bg-white rounded-full h-2">
@@ -3568,7 +3647,7 @@ const EnglishLearningPlatform = () => {
                   className="bg-blue-600 h-2 rounded-full"
                   style={{
                     width: `${
-                      (user.sessionsCompleted / user.dailyGoal) * 100
+                      (user.dailyGoalProgress / user.dailyGoal) * 100
                     }%`,
                   }}
                 ></div>
