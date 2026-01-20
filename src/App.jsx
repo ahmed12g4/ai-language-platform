@@ -61,8 +61,7 @@ const EnglishLearningPlatform = () => {
   const [lessonProgress, setLessonProgress] = useState({});
 
   // API Key
-  const GROQ_API_KEY =
-    "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";
+  const GROQ_API_KEY = "gsk_VF1Q2EwoLW4uEoMv4TmRWGdyb3FYvfGF0KXiqo";
 
   // Refs
   const recognitionRef = useRef(null);
